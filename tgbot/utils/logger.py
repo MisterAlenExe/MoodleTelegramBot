@@ -9,9 +9,9 @@ from aiogram import types
 #                     datefmt='%d/%m %H:%M:%S',
 #                     level=logging.INFO)
 logging.basicConfig(
-        level=logging.INFO,
-        format="%(asctime)s - %(levelname)s - %(message)s",
-        datefmt='%d/%m %H:%M:%S'
+    level=logging.INFO,
+    format="%(asctime)s - %(levelname)s - %(message)s",
+    datefmt='%d/%m %H:%M:%S'
     )
 logger = logging.getLogger()
 
@@ -21,7 +21,7 @@ def print_msg(func):
     def wrapper(*args, **kwargs):
         message: types.Message = args[0]
         if message.chat.id == message.from_user.id:
-            logger.info(f"{message.from_user.id} - {message.text}")
+            logger.info(f"{message.from_user.full_name}({message.from_user.id}) - {message.text}")
         else:
             logger.info(
                 f"{message.from_user.id} / {message.chat.id} - {message.text}")

@@ -1,7 +1,7 @@
 import requests
 from bs4 import BeautifulSoup
-from login import SignIn
-from config import load_config
+from moodle.login import SignIn
+from tgbot.utils.config import load_config
 
 
 class Parser:

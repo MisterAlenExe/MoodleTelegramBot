@@ -1,19 +1,22 @@
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
-from tgbot.handlers.logger import logger, print_msg
+from tgbot.utils.logger import logger, print_msg
+from tgbot.utils.config import load_config
+from tgbot.utils.throttling import rate_limit
 
-from parser import Parser
-from config import load_config
+from moodle.parser import Parser
 
 
 @print_msg
+@rate_limit(limit=3)
 async def start(message: types.Message):
     text = "Welcome, bro!"
     await message.reply(text)
 
 
 @print_msg
+@rate_limit(limit=3)
 async def send_grades(message: types.Message):
     args = message.get_args()
     data = load_config()

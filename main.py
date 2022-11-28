@@ -4,10 +4,11 @@ from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
-from config import load_config
+from tgbot.utils.config import load_config
 
 from tgbot.handlers.menu import register_menu
-from tgbot.handlers.logger import logger
+from tgbot.utils.logger import logger
+from tgbot.middlewares.throttling import ThrottlingMiddleware
 
 
 async def main():
@@ -21,6 +22,7 @@ async def main():
     bot = Bot(token=data_config['bot_token'])
     dp = Dispatcher(bot, storage=MemoryStorage())
 
+    dp.setup_middleware(ThrottlingMiddleware())
     register_menu(dp)
 
     await dp.start_polling()

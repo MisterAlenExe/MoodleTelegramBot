@@ -1,3 +1,4 @@
+import os
 import pickle
 import time
 import requests
@@ -43,7 +44,9 @@ def auth_microsoft(barcode, password):
     WebDriverWait(browser, 10).until(ec.element_to_be_clickable(next_button)).click()
     WebDriverWait(browser, 10).until(ec.element_to_be_clickable(next_button)).click()
 
-    pickle.dump(browser.get_cookies(), open(f"cookies/{barcode}", "wb"))
+    if not os.path.exists("moodle/cookies"):
+        os.mkdir("moodle/cookies")
+    pickle.dump(browser.get_cookies(), open(f"moodle/cookies/{barcode}", "wb"))
     browser_cookies = browser.get_cookies()
     browser.close()
     browser.quit()
@@ -52,7 +55,7 @@ def auth_microsoft(barcode, password):
 def auth_with_cookies(barcode, password):
     session = requests.Session()
     cookies = {}
-    for cookie in pickle.load(open(f"cookies/{barcode}", 'rb')):
+    for cookie in pickle.load(open(f"moodle/cookies/{barcode}", 'rb')):
         cookies[cookie['name']] = cookie['value']
     response = session.get('https://moodle.astanait.edu.kz/?lang=en', cookies=cookies)
     if "You are not logged in" in response.text:
