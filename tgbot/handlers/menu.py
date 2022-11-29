@@ -17,14 +17,22 @@ async def start(message: types.Message):
 
 @print_msg
 @rate_limit(limit=3)
+async def send_active_courses(message: types.Message):
+    parser = Parser()
+    text = parser.get_courses()
+    # await message.reply(text)
+
+
+@print_msg
+@rate_limit(limit=3)
 async def send_grades(message: types.Message):
     args = message.get_args()
-    data = load_config()
     parser = Parser()
     text = parser.get_grades(args)
-    await message.reply(text)
+    # await message.reply(text)
 
 
 def register_menu(dp: Dispatcher):
     dp.register_message_handler(start, commands=['start'])
     dp.register_message_handler(send_grades, commands=['grades'])
+    dp.register_message_handler(send_active_courses, commands=['courses'])
