@@ -1,6 +1,8 @@
+import json
 from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 
+from database import Database
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.config import load_config
 from tgbot.utils.throttling import rate_limit
@@ -13,6 +15,32 @@ from moodle.parser import Parser
 @rate_limit(limit=3)
 async def start(message: types.Message):
     text = "Welcome, bro!"
+    await message.reply(text)
+
+
+@print_msg
+@rate_limit(limit=3)
+async def new_user(message: types.Message):
+    db = Database()
+    user_id = '123123'
+    grades = {
+        "Discrete Math": "85",
+        "Foreign Language": "90",
+        "Psychology": "93"
+    }
+    courses = {
+        "1234": "Discrete Math",
+        "4567": "Foreign Language",
+        "9567": "Psychology"
+    }
+    new_user = {
+        "user_id": user_id,
+        "grades": json.dumps(grades),
+        "courses": json.dumps(courses)
+    }
+    # await db.set_keys(user_id, new_user)
+    # text = await db.get_keys(user_id, ["grades", "courses"])
+    text = await db.get_dict(user_id)
     await message.reply(text)
 
 
@@ -53,6 +81,7 @@ def register_menu(dp: Dispatcher):
     dp.register_message_handler(start, commands=['start'])
     dp.register_message_handler(send_grades, commands=['grades'])
     dp.register_message_handler(send_active_courses, commands=['courses'])
+    dp.register_message_handler(new_user, commands=['test'])
 
     dp.register_callback_query_handler(
         grades,

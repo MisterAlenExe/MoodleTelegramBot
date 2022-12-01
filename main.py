@@ -4,6 +4,7 @@ from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 
+from database import Database
 from tgbot.utils.config import load_config
 
 from tgbot.handlers.menu import register_menu
@@ -31,5 +32,7 @@ async def main():
 if __name__ == '__main__':
     try:
         asyncio.run(main())
+        with Database() as db:
+            asyncio.run(db.close())
     except (KeyboardInterrupt, SystemExit):
         logger.error("Bot stopped!")
