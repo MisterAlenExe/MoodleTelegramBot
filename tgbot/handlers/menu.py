@@ -14,7 +14,12 @@ from moodle.parser import Parser
 @print_msg
 @rate_limit(limit=3)
 async def start(message: types.Message):
-    text = "Welcome, bro!"
+    db = Database()
+    if await db.if_user_exists(message.from_user.id):
+        text = "Hello! I know you."
+    else:
+        await db.add_new_user(message.from_user.id)
+        text = "Hello! Who are you?"
     await message.reply(text)
 
 
@@ -48,7 +53,14 @@ async def new_user(message: types.Message):
 @rate_limit(limit=3)
 async def send_active_courses(message: types.Message):
     parser = Parser()
-    text = parser.get_courses()
+    courses = parser.get_courses()
+    text = ""
+    db = Database()
+    await db.set_key(message.from_user.id, 'courses', json.dumps(courses))
+    for _, el in courses.items():
+        text += f"ID - {el['id']}\n" \
+                f"Name - {el['name']}\n" \
+                f"Link - {el['link']}\n\n"
     await message.reply(text, reply_markup=add_delete_button())
 
 
@@ -61,7 +73,10 @@ async def send_grades(message: types.Message):
 async def grades(call: types.CallbackQuery):
     parser = Parser()
     if call.data in parser.get_courses().keys():
-        text = parser.get_grades(call.data)
+        marks = parser.get_grades(call.data)
+        text = ""
+        for itemname, grade in marks.items():
+            text += f"{itemname} - {grade}\n"
         await call.message.edit_text(text, reply_markup=add_delete_button())
     await call.answer()
 

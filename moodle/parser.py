@@ -31,7 +31,7 @@ class Parser:
                 # text += f"Name - {name_subject}\n" \
                 #         f"ID - {id_subject}\n" \
                 #         f"Link - {link_subject}\n\n"
-                courses.update({id_subject: name_subject})
+                courses.update({id_subject: {'id': id_subject, 'name': name_subject, 'link': link_subject}})
         return courses
 
     def get_grades(self, id_subject):
@@ -45,7 +45,7 @@ class Parser:
         }
         response = requests.get("https://moodle.astanait.edu.kz/webservice/rest/server.php", params=args)
         text = json.loads(response.text)['tables'][0]['tabledata']
-        grades = ""
+        grades = {}
         for el in text:
             if el.__class__ is list or len(el) in [0, 2]:
                 continue
@@ -55,7 +55,9 @@ class Parser:
             for string in strings:
                 itemname = itemname.replace(string, '')
                 # print(f"{itemname} - {grade}")
-            grades += f"{itemname} - {grade}\n"
+            grades.update({
+                itemname: grade
+            })
         return grades
 
     # def get_grades(self, id_subject):

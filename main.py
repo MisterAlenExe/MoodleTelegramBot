@@ -32,7 +32,8 @@ async def main():
 if __name__ == '__main__':
     try:
         asyncio.run(main())
-        with Database() as db:
-            asyncio.run(db.close())
     except (KeyboardInterrupt, SystemExit):
         logger.error("Bot stopped!")
+    finally:
+        db = Database()
+        asyncio.run(db.close())

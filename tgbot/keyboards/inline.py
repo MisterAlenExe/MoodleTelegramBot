@@ -16,7 +16,7 @@ def add_courses_buttons():
     kb = InlineKeyboardMarkup()
     parser = Parser()
     courses = parser.get_courses()
-    for id_subject, name_subject in courses.items():
-        course_btn = InlineKeyboardButton(name_subject, callback_data=id_subject)
+    for _, el in courses.items():
+        course_btn = InlineKeyboardButton(el['name'], callback_data=el['id'])
         kb.add(course_btn)
     return kb

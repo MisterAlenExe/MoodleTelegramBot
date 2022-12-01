@@ -24,3 +24,21 @@ class Database:
 
     async def get_dict(self, name: str) -> dict:
         return await self.redis.hgetall(name)
+
+    async def if_user_exists(self, user_id: str):
+        if await self.redis.exists(user_id):
+            return True
+        else:
+            return False
+
+    async def add_new_user(self, user_id: str):
+        grades = {}
+        courses = {}
+        new_user = {
+            'user_id': user_id,
+            'barcode': '',
+            'password': '',
+            'grades': json.dumps(grades),
+            'courses': json.dumps(courses)
+        }
+        await self.set_keys(user_id, new_user)
