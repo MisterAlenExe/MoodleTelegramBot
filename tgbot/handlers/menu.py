@@ -45,7 +45,7 @@ async def send_active_courses(message: types.Message):
     text = ""
     db = Database()
     courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
-    for _, course in courses_dict.values():
+    for course in courses_dict.values():
         text += f"ID - {course['id']}\n" \
                 f"Name - {course['name']}\n" \
                 f"Link - {course['link']}\n\n"
