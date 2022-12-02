@@ -1,18 +1,21 @@
 import requests
 import json
 from bs4 import BeautifulSoup
-from moodle.login import SignIn
+
 from tgbot.utils.config import load_config
-from tgbot.utils.logger import logger
+from moodle.login import SignIn
+from database import Database
 
 
 class Parser:
     main_url = "https://moodle.astanait.edu.kz/?lang=en"
     grade_url = "https://moodle.astanait.edu.kz/grade/report/user/index.php?id="
 
+    def __init__(self, barcode, password):
+        self.barcode, self.password = barcode, password
+
     def get_cookies(self):
-        data = load_config()
-        signin = SignIn(data)
+        signin = SignIn(self.barcode, self.password)
         return signin.login_moodle()
 
     def get_courses(self):

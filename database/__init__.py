@@ -42,3 +42,36 @@ class Database:
             'courses': json.dumps(courses)
         }
         await self.set_keys(user_id, new_user)
+
+    async def register_moodle_user(self, user_id: str, barcode: str, password: str):
+        user = {
+            'barcode': barcode,
+            'password': crypt(password, barcode)
+        }
+        await self.set_keys(user_id, user)
+
+    async def get_user_data(self, user_id: str):
+        barcode = await self.get_key(user_id, 'barcode')
+        password = decrypt(await self.get_key(user_id, 'password'), barcode)
+        return barcode, password
+
+
+def crypto(message: str, secret: str) -> str:
+    new_chars = list()
+    i = 0
+    for num_chr in (ord(c) for c in message):
+        num_chr ^= ord(secret[i])
+        new_chars.append(num_chr)
+        i += 1
+        if i >= len(secret):
+            i = 0
+    return ''.join(chr(c) for c in new_chars)
+
+
+def crypt(message: str, secret: str) -> str:
+    return crypto(message, secret).encode('utf-8').hex()
+
+
+def decrypt(message_hex: str, secret: str) -> str:
+    message = bytes.fromhex(message_hex).decode('utf-8')
+    return crypto(message, secret)

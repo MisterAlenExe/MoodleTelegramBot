@@ -46,10 +46,19 @@ def auth_microsoft(barcode, password):
 
     if not os.path.exists("moodle/cookies"):
         os.mkdir("moodle/cookies")
-    pickle.dump(browser.get_cookies(), open(f"moodle/cookies/{barcode}", "wb"))
     browser_cookies = browser.get_cookies()
+    pickle.dump(browser_cookies, open(f"moodle/cookies/{barcode}", "wb"))
     browser.close()
     browser.quit()
+    session = requests.Session()
+    cookies = {}
+    for cookie in browser_cookies:
+        cookies[cookie['name']] = cookie['value']
+    response = session.get('https://moodle.astanait.edu.kz/?lang=en', cookies=cookies)
+    if "You are not logged in" in response.text:
+        return False
+    else:
+        return True
 
 
 def auth_with_cookies(barcode, password):
@@ -70,9 +79,9 @@ def auth_with_cookies(barcode, password):
 class SignIn:
     main_url = "https://moodle.astanait.edu.kz/"
 
-    def __init__(self, data):
-        self.barcode = data['barcode']
-        self.password = data['password']
+    def __init__(self, barcode, password):
+        self.barcode = barcode
+        self.password = password
 
     def login_moodle(self):
         try:
