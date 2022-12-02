@@ -6,7 +6,7 @@ from database import Database
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.config import load_config
 from tgbot.utils.throttling import rate_limit
-from tgbot.keyboards.inline import add_delete_button, add_courses_buttons
+from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
 
 from moodle.parser import Parser
 
@@ -25,59 +25,53 @@ async def start(message: types.Message):
 
 @print_msg
 @rate_limit(limit=3)
-async def new_user(message: types.Message):
+async def update_data(message: types.Message):
+    parser = Parser()
+    courses_dict = parser.get_courses()
+    grades_dict = {}
+    for id_course in courses_dict.keys():
+        grades_dict.update({
+            id_course: parser.get_grades(id_course)
+        })
     db = Database()
-    user_id = '123123'
-    grades = {
-        "Discrete Math": "85",
-        "Foreign Language": "90",
-        "Psychology": "93"
-    }
-    courses = {
-        "1234": "Discrete Math",
-        "4567": "Foreign Language",
-        "9567": "Psychology"
-    }
-    new_user = {
-        "user_id": user_id,
-        "grades": json.dumps(grades),
-        "courses": json.dumps(courses)
-    }
-    # await db.set_keys(user_id, new_user)
-    # text = await db.get_keys(user_id, ["grades", "courses"])
-    text = await db.get_dict(user_id)
-    await message.reply(text)
+    await db.set_key(message.from_user.id, 'courses', json.dumps(courses_dict))
+    await db.set_key(message.from_user.id, 'grades', json.dumps(grades_dict))
+    await message.reply("Your courses and grades are updated.")
 
 
 @print_msg
 @rate_limit(limit=3)
 async def send_active_courses(message: types.Message):
-    parser = Parser()
-    courses = parser.get_courses()
     text = ""
     db = Database()
-    await db.set_key(message.from_user.id, 'courses', json.dumps(courses))
-    for _, el in courses.items():
-        text += f"ID - {el['id']}\n" \
-                f"Name - {el['name']}\n" \
-                f"Link - {el['link']}\n\n"
+    courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
+    for _, course in courses_dict.values():
+        text += f"ID - {course['id']}\n" \
+                f"Name - {course['name']}\n" \
+                f"Link - {course['link']}\n\n"
     await message.reply(text, reply_markup=add_delete_button())
 
 
 @print_msg
 @rate_limit(limit=3)
 async def send_grades(message: types.Message):
-    await message.reply("Choose course:", reply_markup=add_delete_button(add_courses_buttons()))
+    db = Database()
+    courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
+    await message.reply("Choose course:", reply_markup=add_delete_button(add_courses_buttons(courses_dict)))
 
 
 async def grades(call: types.CallbackQuery):
-    parser = Parser()
-    if call.data in parser.get_courses().keys():
-        marks = parser.get_grades(call.data)
+    db = Database()
+    courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
+    if call.data in courses_dict.keys():
         text = ""
-        for itemname, grade in marks.items():
+        grades_dict = json.loads(await db.get_key(call.from_user.id, 'grades'))
+        for itemname, grade in grades_dict[call.data].items():
             text += f"{itemname} - {grade}\n"
-        await call.message.edit_text(text, reply_markup=add_delete_button())
+        await call.message.edit_text(text, reply_markup=add_back_button())
+    elif call.data == 'back_to_courses':
+        await call.message.edit_text("Choose course:", reply_markup=add_delete_button(add_courses_buttons(
+            courses_dict)))
     await call.answer()
 
 
@@ -96,11 +90,11 @@ def register_menu(dp: Dispatcher):
     dp.register_message_handler(start, commands=['start'])
     dp.register_message_handler(send_grades, commands=['grades'])
     dp.register_message_handler(send_active_courses, commands=['courses'])
-    dp.register_message_handler(new_user, commands=['test'])
+    dp.register_message_handler(update_data, commands=['update_data'])
 
     dp.register_callback_query_handler(
         grades,
-        lambda c: c.data.isdigit()
+        lambda c: c.data.isdigit() or c.data == 'back_to_courses'
     )
     dp.register_callback_query_handler(
         delete_message,
