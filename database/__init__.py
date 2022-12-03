@@ -37,10 +37,14 @@ class Database:
         }
         await self.set_keys(user_id, new_user)
 
-    async def register_moodle_user(self, user_id: str, barcode: str, password: str):
+    async def register_moodle_user(self, user_id: str, barcode: str, password: str, cookies: dict, moodle_userid: str,
+                                   token: str):
         user = {
             'barcode': barcode,
-            'password': crypt(password, barcode)
+            'password': crypt(password, barcode),
+            'cookies': json.dumps(cookies),
+            'moodle_userid': moodle_userid,
+            'webservice_token': crypt(token, moodle_userid)
         }
         await self.set_keys(user_id, user)
 

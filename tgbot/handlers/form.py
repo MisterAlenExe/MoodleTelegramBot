@@ -7,7 +7,8 @@ from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
 from tgbot.keyboards.inline import add_delete_button
 
-from moodle.login import auth_microsoft
+from functions.login import auth_microsoft, is_cookies_valid
+from functions.parser import Parser
 
 
 class RegForm(StatesGroup):
@@ -60,9 +61,12 @@ async def wait_password(message: types.Message, state: FSMContext):
         async with state.proxy() as data:
             barcode = data['barcode']
             data['msg_del'] = msg
-        if auth_microsoft(barcode, password):
+        cookies = await auth_microsoft(barcode, password)
+        if await is_cookies_valid(cookies):
             db = Database()
-            await db.register_moodle_user(message.from_user.id, barcode, password)
+            parser = Parser()
+            token, userid = await parser.get_token_and_userid(cookies)
+            await db.register_moodle_user(message.from_user.id, barcode, password, cookies, userid, token)
             await message.answer("Your Moodle account is registred\!", parse_mode='MarkdownV2',
                                  reply_markup=add_delete_button())
         else:

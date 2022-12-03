@@ -2,33 +2,39 @@ import json
 
 from aiogram import Dispatcher, types
 
-from database import Database, crypt, decrypt
+from database import Database, decrypt
+from functions.login import is_cookies_valid, auth_microsoft
+from functions.parser import Parser
+
+from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
-from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
-
-from moodle.parser import Parser
 
 
 @print_msg
 @rate_limit(limit=3)
 async def update_data(message: types.Message):
     db = Database()
-    barcode, password = await db.get_user_data(message.from_user.id)
-    parser = Parser(barcode, password)
-    cookies = parser.get_cookies()
-    courses_dict = parser.get_courses(cookies)
-    token, userid = parser.get_token_and_userid(cookies)
+    parser = Parser()
+
+    cookies = json.loads(await db.get_key(message.from_user.id, 'cookies'))
+    while not await is_cookies_valid(cookies):
+        barcode, password = await db.get_user_data(message.from_user.id)
+        cookies = await auth_microsoft(barcode, password)
+
+    courses_dict = await parser.get_courses(cookies)
     grades_dict = {}
+    token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
+    token = decrypt(token, userid)
+
     for id_course in courses_dict.keys():
         grades_dict.update({
-            id_course: parser.get_grades(id_course, token, userid)
+            id_course: await parser.get_grades(id_course, token, userid)
         })
+
     await db.set_keys(
         message.from_user.id,
         {
-            'userid': userid,
-            'webservice_token': crypt(token, userid),
             'cookies': json.dumps(cookies),
             'courses': json.dumps(courses_dict),
             'grades': json.dumps(grades_dict)

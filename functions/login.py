@@ -1,6 +1,3 @@
-import os
-import pickle
-import time
 import requests
 from selenium import webdriver
 from selenium.webdriver.common.by import By
@@ -8,18 +5,16 @@ from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
 
-# from fake_useragent import UserAgent
-
-
-def auth_microsoft(barcode, password):
+async def auth_microsoft(barcode, password):
     options = webdriver.ChromeOptions()
-    # options.add_argument(f"user-agent={UserAgent().chrome}")
+    options.add_experimental_option('excludeSwitches', ['enable-logging'])
     options.add_argument(
         "user-agent=Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) "
         "Chrome/107.0.0.0 Safari/537.36")
     options.add_argument("--headless")
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-blink-features=AutomationControlled")
+    options.add_argument('log-level=3')
     browser = webdriver.Chrome(options=options)
 
     email_field = (By.ID, "i0116")
@@ -47,40 +42,17 @@ def auth_microsoft(barcode, password):
     browser_cookies = browser.get_cookies()
     browser.close()
     browser.quit()
-    session = requests.Session()
+
     cookies = {}
     for cookie in browser_cookies:
         cookies[cookie['name']] = cookie['value']
-    response = session.get('https://moodle.astanait.edu.kz/?lang=en', cookies=cookies)
-    if "You are not logged in" in response.text:
-        return False, {}
-    else:
-        return True, cookies
+    return cookies
 
 
-def auth_with_cookies(barcode, password, cookies):
+async def is_cookies_valid(cookies):
     session = requests.Session()
     response = session.get('https://moodle.astanait.edu.kz/?lang=en', cookies=cookies)
     if "You are not logged in" in response.text:
-        print("Cookies are invalid. Trying to log in again...")
-        auth_microsoft(barcode, password)
-        auth_with_cookies(barcode, password, cookies)
+        return False
     else:
-        print("We are authorized.")
-        return cookies
-
-
-class SignIn:
-    main_url = "https://moodle.astanait.edu.kz/"
-
-    def __init__(self, barcode, password, cookies):
-        self.barcode = barcode
-        self.password = password
-        self.cookies = cookies
-
-    def login_moodle(self):
-        try:
-            return auth_with_cookies(self.barcode, self.password, self.cookies)
-        except FileNotFoundError:
-            auth_microsoft(self.barcode, self.password)
-            return auth_with_cookies(self.barcode, self.password, self.cookies)
+        return True
