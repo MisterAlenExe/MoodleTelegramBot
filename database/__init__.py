@@ -32,14 +32,8 @@ class Database:
             return False
 
     async def add_new_user(self, user_id: str):
-        grades = {}
-        courses = {}
         new_user = {
             'user_id': user_id,
-            'barcode': '',
-            'password': '',
-            'grades': json.dumps(grades),
-            'courses': json.dumps(courses)
         }
         await self.set_keys(user_id, new_user)
 

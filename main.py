@@ -14,9 +14,6 @@ from tgbot.middlewares.throttling import ThrottlingMiddleware
 
 async def main():
     data_config = load_config()
-    # parser = Parser()
-    # parser.get_courses()
-    # parser.get_grades()
 
     logger.info("Starting bot")
 

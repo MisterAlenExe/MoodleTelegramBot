@@ -4,9 +4,8 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from database import Database
+from database import Database, crypt, decrypt
 from tgbot.utils.logger import logger, print_msg
-from tgbot.utils.config import load_config
 from tgbot.utils.throttling import rate_limit
 from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
 
@@ -37,14 +36,24 @@ async def update_data(message: types.Message):
     db = Database()
     barcode, password = await db.get_user_data(message.from_user.id)
     parser = Parser(barcode, password)
-    courses_dict = parser.get_courses()
+    cookies = parser.get_cookies()
+    courses_dict = parser.get_courses(cookies)
+    token, userid = parser.get_token_and_userid(cookies)
     grades_dict = {}
     for id_course in courses_dict.keys():
         grades_dict.update({
-            id_course: parser.get_grades(id_course)
+            id_course: parser.get_grades(id_course, token, userid)
         })
-    await db.set_key(message.from_user.id, 'courses', json.dumps(courses_dict))
-    await db.set_key(message.from_user.id, 'grades', json.dumps(grades_dict))
+    await db.set_keys(
+        message.from_user.id,
+        {
+            'userid': userid,
+            'webservice_token': crypt(token, userid),
+            'cookies': json.dumps(cookies),
+            'courses': json.dumps(courses_dict),
+            'grades': json.dumps(grades_dict)
+        }
+    )
     await message.reply("Your courses and grades are updated.")
 
 
