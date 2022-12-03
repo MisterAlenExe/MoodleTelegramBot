@@ -8,8 +8,20 @@ from database import Database
 from tgbot.utils.config import load_config
 
 from tgbot.handlers.menu import register_menu
+from tgbot.handlers.moodle import register_moodle
+from tgbot.handlers.form import register_form
 from tgbot.utils.logger import logger
 from tgbot.middlewares.throttling import ThrottlingMiddleware
+
+
+def register_all_middlewares(dp):
+    dp.setup_middleware(ThrottlingMiddleware())
+
+
+def register_all_handlers(dp):
+    register_menu(dp)
+    register_moodle(dp)
+    register_form(dp)
 
 
 async def main():
@@ -20,8 +32,8 @@ async def main():
     bot = Bot(token=data_config['bot_token'])
     dp = Dispatcher(bot, storage=MemoryStorage())
 
-    dp.setup_middleware(ThrottlingMiddleware())
-    register_menu(dp)
+    register_all_middlewares(dp)
+    register_all_handlers(dp)
 
     await dp.start_polling()
 
