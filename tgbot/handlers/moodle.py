@@ -6,7 +6,6 @@ from database import Database, decrypt
 from functions.login import is_cookies_valid, auth_microsoft
 from functions.parser import Parser
 
-from tgbot.handlers.notify import notify_user
 from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
@@ -49,7 +48,7 @@ async def update_data(message: types.Message):
                 text += f"      {itemname} / {old_grade} -> {grade}\n"
             text += "\n"
     if isNewGrade:
-        await notify_user(message, text)
+        await message.answer(text, parse_mode='HTML')
 
     await db.set_keys(
         message.from_user.id,

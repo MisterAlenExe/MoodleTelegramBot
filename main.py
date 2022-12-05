@@ -3,6 +3,7 @@ import asyncio
 from aiogram import Bot
 from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from database import Database
 from tgbot.utils.config import load_config
@@ -19,11 +20,11 @@ def register_all_middlewares(dp):
     dp.setup_middleware(ThrottlingMiddleware())
 
 
-def register_all_handlers(dp):
+def register_all_handlers(dp, bot, scheduler):
     register_menu(dp)
     register_moodle(dp)
     register_form(dp)
-    register_schedulers(dp)
+    register_schedulers(bot, scheduler)
 
 
 async def main():
@@ -33,10 +34,12 @@ async def main():
 
     bot = Bot(token=data_config['bot_token'])
     dp = Dispatcher(bot, storage=MemoryStorage())
+    scheduler = AsyncIOScheduler(timezone="Asia/Almaty")
 
     register_all_middlewares(dp)
-    register_all_handlers(dp)
+    register_all_handlers(dp, bot, scheduler)
 
+    scheduler.start()
     await dp.start_polling()
 
 

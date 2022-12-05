@@ -10,6 +10,9 @@ class Database:
     async def close(self):
         await self.redis.close()
 
+    async def get_all_users(self):
+        return await self.redis.keys()
+
     async def set_key(self, name: str, key: str, value):
         await self.redis.hset(name, key, value)
 
