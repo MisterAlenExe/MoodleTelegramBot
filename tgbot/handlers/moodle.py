@@ -6,6 +6,7 @@ from database import Database, decrypt
 from functions.login import is_cookies_valid, auth_microsoft
 from functions.parser import Parser
 
+from tgbot.handlers.notify import notify_user
 from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
@@ -23,14 +24,32 @@ async def update_data(message: types.Message):
         cookies = await auth_microsoft(barcode, password)
 
     courses_dict = await parser.get_courses(cookies)
-    grades_dict = {}
+    grades_dict = json.loads(await db.get_key(message.from_user.id, 'grades'))
+    new_grades_dict = {}
     token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
     token = decrypt(token, userid)
 
     for id_course in courses_dict.keys():
-        grades_dict.update({
+        new_grades_dict.update({
             id_course: await parser.get_grades(id_course, token, userid)
         })
+
+    text = "Updated grades:\n\n"
+    isNewGrade = False
+    for id_course in new_grades_dict.keys():
+        diff = new_grades_dict[id_course].items() - grades_dict[id_course].items()
+        if len(diff) != 0:
+            isNewGrade = True
+            link_course = courses_dict[id_course]['link']
+            name_course = courses_dict[id_course]['name']
+            text += f"  <a href=\"{link_course}\">{name_course}</a>\n"
+            for el in diff:
+                itemname, grade = el
+                old_grade = grades_dict[id_course].get(itemname)
+                text += f"      {itemname} / {old_grade} -> {grade}\n"
+            text += "\n"
+    if isNewGrade:
+        await notify_user(message, text)
 
     await db.set_keys(
         message.from_user.id,

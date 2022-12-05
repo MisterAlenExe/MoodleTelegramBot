@@ -10,6 +10,7 @@ from tgbot.utils.config import load_config
 from tgbot.handlers.menu import register_menu
 from tgbot.handlers.moodle import register_moodle
 from tgbot.handlers.form import register_form
+from tgbot.handlers.notify import register_schedulers
 from tgbot.utils.logger import logger
 from tgbot.middlewares.throttling import ThrottlingMiddleware
 
@@ -22,6 +23,7 @@ def register_all_handlers(dp):
     register_menu(dp)
     register_moodle(dp)
     register_form(dp)
+    register_schedulers(dp)
 
 
 async def main():
