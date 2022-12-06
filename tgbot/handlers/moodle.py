@@ -98,13 +98,14 @@ async def grades(call: types.CallbackQuery):
 
 async def show_grades_for_course(call: types.CallbackQuery):
     db = Database()
+    courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     grades_dict = json.loads(await db.get_key(call.from_user.id, 'grades'))
 
-    text = ""
+    text = f"<a href=\"{courses_dict[call.data]['link']}\">{courses_dict[call.data]['name']}</a>:\n"
     for itemname, grade in grades_dict[call.data].items():
-        text += f"{itemname} - {grade}\n"
+        text += f"  {itemname} - {grade}\n"
 
-    await call.message.edit_text(text, reply_markup=back_to_grades())
+    await call.message.edit_text(text, reply_markup=back_to_grades(), parse_mode='HTML')
     await call.answer()
 
 
