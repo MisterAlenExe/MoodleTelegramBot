@@ -38,7 +38,7 @@ async def auto_update(bot: Bot):
                 isNewGrade = True
                 link_course = courses_dict[id_course]['link']
                 name_course = courses_dict[id_course]['name']
-                text += f"  <a href=\"{link_course}\">{name_course}</a>\n"
+                text += f"  <a href=\"{link_course}\">{name_course}</a>:\n"
                 for el in diff:
                     itemname, grade = el
                     old_grade = grades_dict[id_course].get(itemname)

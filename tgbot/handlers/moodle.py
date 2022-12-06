@@ -1,4 +1,5 @@
 import json
+import datetime
 
 from aiogram import Dispatcher, types
 
@@ -23,39 +24,24 @@ async def update_data(message: types.Message):
         cookies = await auth_microsoft(barcode, password)
 
     courses_dict = await parser.get_courses(cookies)
-    grades_dict = json.loads(await db.get_key(message.from_user.id, 'grades'))
-    new_grades_dict = {}
+    grades_dict = {}
     token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
     token = decrypt(token, userid)
 
     for id_course in courses_dict.keys():
-        new_grades_dict.update({
+        grades_dict.update({
             id_course: await parser.get_grades(id_course, token, userid)
         })
 
-    text = "Updated grades:\n\n"
-    isNewGrade = False
-    for id_course in new_grades_dict.keys():
-        diff = new_grades_dict[id_course].items() - grades_dict[id_course].items()
-        if len(diff) != 0:
-            isNewGrade = True
-            link_course = courses_dict[id_course]['link']
-            name_course = courses_dict[id_course]['name']
-            text += f"  <a href=\"{link_course}\">{name_course}</a>\n"
-            for el in diff:
-                itemname, grade = el
-                old_grade = grades_dict[id_course].get(itemname)
-                text += f"      {itemname} / {old_grade} -> {grade}\n"
-            text += "\n"
-    if isNewGrade:
-        await message.answer(text, parse_mode='HTML')
+    deadlines = await parser.get_deadlines(token)
 
     await db.set_keys(
         message.from_user.id,
         {
             'cookies': json.dumps(cookies),
             'courses': json.dumps(courses_dict),
-            'grades': json.dumps(grades_dict)
+            'grades': json.dumps(grades_dict),
+            'deadlines': json.dumps(deadlines)
         }
     )
     await message.reply("Your courses and grades are updated.")
@@ -80,6 +66,35 @@ async def send_grades(message: types.Message):
     db = Database()
     courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
     await message.reply("Choose course:", reply_markup=add_delete_button(add_courses_buttons(courses_dict)))
+
+
+@print_msg
+@rate_limit(limit=3)
+async def send_deadlines(message: types.Message):
+    db = Database()
+    courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
+    deadlines_dict = json.loads(await db.get_key(message.from_user.id, 'deadlines'))
+
+    text = ""
+    time_now = datetime.datetime.now().replace(microsecond=0)
+
+    for id_course, assigns_dict in deadlines_dict.items():
+        if assigns_dict:
+            link_course = courses_dict[id_course]['link']
+            name_course = courses_dict[id_course]['name']
+            text += f"<a href=\"{link_course}\">{name_course}</a>:\n"
+            for id_assign, assign in assigns_dict.items():
+                name_assign = assign['name']
+                duedate = datetime.datetime.fromtimestamp(assign['deadline']).replace(microsecond=0)
+                deadline = duedate.strftime("%A, %d %B, %I:%M %p")
+                remaining = duedate - time_now
+                link_assign = assign['link']
+
+                text += f"  <a href=\"{link_assign}\">{name_assign}</a>\n"
+                text += f"  {deadline}\n"
+                text += f"  Remaining: {remaining}\n\n"
+
+    await message.reply(text, reply_markup=add_delete_button(), parse_mode='HTML')
 
 
 async def grades(call: types.CallbackQuery):
@@ -110,6 +125,7 @@ async def delete_message(call: types.CallbackQuery):
 
 def register_moodle(dp: Dispatcher):
     dp.register_message_handler(send_grades, commands=['grades'])
+    dp.register_message_handler(send_deadlines, commands=['deadlines'])
     dp.register_message_handler(send_active_courses, commands=['courses'])
     dp.register_message_handler(update_data, commands=['update_data'])
 
