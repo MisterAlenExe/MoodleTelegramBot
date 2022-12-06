@@ -7,7 +7,7 @@ from database import Database, decrypt
 from functions.login import is_cookies_valid, auth_microsoft
 from functions.parser import Parser
 
-from tgbot.keyboards.inline import add_delete_button, add_courses_buttons, add_back_button
+from tgbot.keyboards.moodle import add_delete_button, grades_courses_btns, back_to_grades
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
 
@@ -62,14 +62,6 @@ async def send_active_courses(message: types.Message):
 
 @print_msg
 @rate_limit(limit=3)
-async def send_grades(message: types.Message):
-    db = Database()
-    courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
-    await message.reply("Choose course:", reply_markup=add_delete_button(add_courses_buttons(courses_dict)))
-
-
-@print_msg
-@rate_limit(limit=3)
 async def send_deadlines(message: types.Message):
     db = Database()
     courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
@@ -100,15 +92,19 @@ async def send_deadlines(message: types.Message):
 async def grades(call: types.CallbackQuery):
     db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
-    if call.data in courses_dict.keys():
-        text = ""
-        grades_dict = json.loads(await db.get_key(call.from_user.id, 'grades'))
-        for itemname, grade in grades_dict[call.data].items():
-            text += f"{itemname} - {grade}\n"
-        await call.message.edit_text(text, reply_markup=add_back_button())
-    elif call.data == 'back_to_courses':
-        await call.message.edit_text("Choose course:", reply_markup=add_delete_button(add_courses_buttons(
-            courses_dict)))
+
+    await call.message.edit_text("Choose course:", reply_markup=grades_courses_btns(courses_dict))
+
+
+async def show_grades_for_course(call: types.CallbackQuery):
+    db = Database()
+    grades_dict = json.loads(await db.get_key(call.from_user.id, 'grades'))
+
+    text = ""
+    for itemname, grade in grades_dict[call.data].items():
+        text += f"{itemname} - {grade}\n"
+
+    await call.message.edit_text(text, reply_markup=back_to_grades())
     await call.answer()
 
 
@@ -124,14 +120,17 @@ async def delete_message(call: types.CallbackQuery):
 
 
 def register_moodle(dp: Dispatcher):
-    dp.register_message_handler(send_grades, commands=['grades'])
     dp.register_message_handler(send_deadlines, commands=['deadlines'])
     dp.register_message_handler(send_active_courses, commands=['courses'])
     dp.register_message_handler(update_data, commands=['update_data'])
 
     dp.register_callback_query_handler(
         grades,
-        lambda c: c.data.isdigit() or c.data == 'back_to_courses'
+        lambda c: c.data == 'grades'
+    )
+    dp.register_callback_query_handler(
+        show_grades_for_course,
+        lambda c: c.data.isdigit() or c.data == 'back_to_grades'
     )
     dp.register_callback_query_handler(
         delete_message,
