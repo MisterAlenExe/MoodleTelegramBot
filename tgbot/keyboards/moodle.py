@@ -11,6 +11,18 @@ def add_delete_button(kb: types.inline_keyboard = None):
     return kb
 
 
+def deadlines_options(kb: types.inline_keyboard = None):
+    if kb is None:
+        kb = InlineKeyboardMarkup()
+    course_btn = InlineKeyboardButton('By course filter', callback_data='deadlines course')
+    day_btn = InlineKeyboardButton('By day filter', callback_data='deadlines day')
+    back_btn = InlineKeyboardButton('Back', callback_data='main_menu')
+    kb.row(course_btn, day_btn)
+    kb.add(back_btn)
+
+    return kb
+
+
 def grades_courses_btns(courses_dict: dict, kb: types.inline_keyboard = None):
     if kb is None:
         kb = InlineKeyboardMarkup()

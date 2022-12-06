@@ -7,7 +7,7 @@ from database import Database, decrypt
 from functions.login import is_cookies_valid, auth_microsoft
 from functions.parser import Parser
 
-from tgbot.keyboards.moodle import add_delete_button, grades_courses_btns, back_to_grades
+from tgbot.keyboards.moodle import add_delete_button, grades_courses_btns, back_to_grades, deadlines_options
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
 
@@ -107,6 +107,10 @@ async def show_grades_for_course(call: types.CallbackQuery):
 
     await call.message.edit_text(text, reply_markup=back_to_grades(), parse_mode='HTML')
     await call.answer()
+
+
+async def deadlines(call: types.CallbackQuery):
+    await call.message.edit_text("Choose option:", reply_markup=deadlines_options())
 
 
 async def delete_message(call: types.CallbackQuery):
