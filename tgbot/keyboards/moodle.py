@@ -14,7 +14,7 @@ def add_delete_button(kb: types.inline_keyboard = None):
 def deadlines_options(kb: types.inline_keyboard = None):
     if kb is None:
         kb = InlineKeyboardMarkup()
-    course_btn = InlineKeyboardButton('By course filter', callback_data='deadlines course')
+    course_btn = InlineKeyboardButton('By course filter', callback_data='deadlines courses')
     day_btn = InlineKeyboardButton('By day filter', callback_data='deadlines day')
     back_btn = InlineKeyboardButton('Back', callback_data='main_menu')
     kb.row(course_btn, day_btn)
@@ -23,27 +23,39 @@ def deadlines_options(kb: types.inline_keyboard = None):
     return kb
 
 
-def grades_courses_btns(courses_dict: dict, kb: types.inline_keyboard = None):
+def courses_btns(flag, courses_dict: dict, kb: types.inline_keyboard = None):
     if kb is None:
         kb = InlineKeyboardMarkup()
     index = 1
     for course in courses_dict.values():
-        course_btn = InlineKeyboardButton(course['name'], callback_data=course['id'])
+        course_btn = InlineKeyboardButton(course['name'], callback_data=f"{flag} {course['id']}")
         if index % 2 != 1:
             kb.insert(course_btn)
         else:
             kb.add(course_btn)
         index += 1
-    back_btn = InlineKeyboardButton('Back', callback_data='main_menu')
+    if flag == 'grades':
+        back_btn = InlineKeyboardButton('Back', callback_data='main_menu')
+    else:
+        back_btn = InlineKeyboardButton('Back', callback_data='deadlines options')
     kb.add(back_btn)
 
     return kb
 
 
-def back_to_grades(kb: types.inline_keyboard = None):
+def back_to_grades_courses(kb: types.inline_keyboard = None):
     if kb is None:
         kb = InlineKeyboardMarkup()
     back_btn = InlineKeyboardButton('Back', callback_data='grades')
+    kb.add(back_btn)
+
+    return kb
+
+
+def back_to_deadlines_courses(kb: types.inline_keyboard = None):
+    if kb is None:
+        kb = InlineKeyboardMarkup()
+    back_btn = InlineKeyboardButton('Back', callback_data='deadlines courses')
     kb.add(back_btn)
 
     return kb

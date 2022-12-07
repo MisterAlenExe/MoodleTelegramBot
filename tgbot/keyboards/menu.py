@@ -16,7 +16,7 @@ def main_menu(kb: types.inline_keyboard = None):
         kb = InlineKeyboardMarkup()
     profile_btn = InlineKeyboardButton('Profile', callback_data='profile')
     grades_btn = InlineKeyboardButton('Grades', callback_data='grades')
-    deadlines_btn = InlineKeyboardButton('Deadlines', callback_data='deadlines')
+    deadlines_btn = InlineKeyboardButton('Deadlines', callback_data='deadlines options')
     kb.add(profile_btn)
     kb.row(grades_btn, deadlines_btn)
 

@@ -7,7 +7,8 @@ from database import Database, decrypt
 from functions.login import is_cookies_valid, auth_microsoft
 from functions.parser import Parser
 
-from tgbot.keyboards.moodle import add_delete_button, grades_courses_btns, back_to_grades, deadlines_options
+from tgbot.keyboards.moodle import add_delete_button, courses_btns, back_to_grades_courses, deadlines_options, \
+    back_to_deadlines_courses
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
 
@@ -92,8 +93,7 @@ async def send_deadlines(message: types.Message):
 async def grades(call: types.CallbackQuery):
     db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
-
-    await call.message.edit_text("Choose course:", reply_markup=grades_courses_btns(courses_dict))
+    await call.message.edit_text("Choose course:", reply_markup=courses_btns('grades', courses_dict))
 
 
 async def show_grades_for_course(call: types.CallbackQuery):
@@ -101,16 +101,54 @@ async def show_grades_for_course(call: types.CallbackQuery):
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     grades_dict = json.loads(await db.get_key(call.from_user.id, 'grades'))
 
-    text = f"<a href=\"{courses_dict[call.data]['link']}\">{courses_dict[call.data]['name']}</a>:\n"
-    for itemname, grade in grades_dict[call.data].items():
+    id_course = call.data.split()[1]
+
+    text = f"<a href=\"{courses_dict[id_course]['link']}\">{courses_dict[id_course]['name']}</a>:\n"
+    for itemname, grade in grades_dict[id_course].items():
         text += f"  {itemname} - {grade}\n"
 
-    await call.message.edit_text(text, reply_markup=back_to_grades(), parse_mode='HTML')
+    await call.message.edit_text(text, reply_markup=back_to_grades_courses(), parse_mode='HTML')
     await call.answer()
 
 
-async def deadlines(call: types.CallbackQuery):
+async def deadlines_choose_option(call: types.CallbackQuery):
     await call.message.edit_text("Choose option:", reply_markup=deadlines_options())
+    await call.answer()
+
+
+async def deadlines_option_courses(call: types.CallbackQuery):
+    db = Database()
+    courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
+    await call.message.edit_text("Choose course:", reply_markup=courses_btns('deadlines', courses_dict))
+
+
+async def show_deadlines_for_course(call: types.CallbackQuery):
+    db = Database()
+    courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
+    deadlines_dict = json.loads(await db.get_key(call.from_user.id, 'deadlines'))
+
+    id_course = call.data.split()[1]
+    text = f"<a href=\"{courses_dict[id_course]['link']}\">{courses_dict[id_course]['name']}</a>:\n"
+    time_now = datetime.datetime.now().replace(microsecond=0)
+    isDeadline = False
+
+    for _, assign in deadlines_dict[id_course].items():
+        name_assign = assign['name']
+        duedate = datetime.datetime.fromtimestamp(assign['deadline']).replace(microsecond=0)
+        deadline = duedate.strftime("%A, %d %B, %I:%M %p")
+        remaining = duedate - time_now
+        link_assign = assign['link']
+
+        text += f"  <a href=\"{link_assign}\">{name_assign}</a>\n"
+        text += f"  {deadline}\n"
+        text += f"  Remaining: {remaining}\n\n"
+
+        isDeadline = True
+    if not isDeadline:
+        text = "There are no any deadlines."
+
+    await call.message.edit_text(text, reply_markup=back_to_deadlines_courses(), parse_mode='HTML')
+    await call.answer()
 
 
 async def delete_message(call: types.CallbackQuery):
@@ -135,7 +173,23 @@ def register_moodle(dp: Dispatcher):
     )
     dp.register_callback_query_handler(
         show_grades_for_course,
-        lambda c: c.data.isdigit() or c.data == 'back_to_grades'
+        lambda c: c.data.split()[0] == 'grades',
+        lambda c: c.data.split()[1].isdigit()
+    )
+    dp.register_callback_query_handler(
+        deadlines_choose_option,
+        lambda c: c.data.split()[0] == 'deadlines',
+        lambda c: c.data.split()[1] == 'options'
+    )
+    dp.register_callback_query_handler(
+        deadlines_option_courses,
+        lambda c: c.data.split()[0] == 'deadlines',
+        lambda c: c.data.split()[1] == 'courses'
+    )
+    dp.register_callback_query_handler(
+        show_deadlines_for_course,
+        lambda c: c.data.split()[0] == 'deadlines',
+        lambda c: c.data.split()[1].isdigit()
     )
     dp.register_callback_query_handler(
         delete_message,
