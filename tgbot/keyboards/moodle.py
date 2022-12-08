@@ -26,12 +26,12 @@ def deadlines_options(kb: types.inline_keyboard = None):
 def deadlines_day_filters_btns(kb: types.inline_keyboard = None):
     if kb is None:
         kb = InlineKeyboardMarkup()
-    one_day = InlineKeyboardButton('<1 day', callback_data='1 day')
-    two_day = InlineKeyboardButton('<2 days', callback_data='2 day')
-    five_day = InlineKeyboardButton('<5 day', callback_data='5 day')
-    ten_day = InlineKeyboardButton('<10 day', callback_data='10 day')
-    fifteen_day = InlineKeyboardButton('<15 day', callback_data='15 day')
-    all_day = InlineKeyboardButton('All', callback_data='all day')
+    one_day = InlineKeyboardButton('<1 day', callback_data='day 1')
+    two_day = InlineKeyboardButton('<2 days', callback_data='day 2')
+    five_day = InlineKeyboardButton('<5 day', callback_data='day 5')
+    ten_day = InlineKeyboardButton('<10 day', callback_data='day 10')
+    fifteen_day = InlineKeyboardButton('<15 day', callback_data='day 15')
+    all_day = InlineKeyboardButton('All', callback_data='day all')
     kb.row(one_day, two_day)
     kb.row(five_day, ten_day)
     kb.row(fifteen_day, all_day)
@@ -74,6 +74,15 @@ def back_to_deadlines_courses(kb: types.inline_keyboard = None):
     if kb is None:
         kb = InlineKeyboardMarkup()
     back_btn = InlineKeyboardButton('Back', callback_data='deadlines courses')
+    kb.add(back_btn)
+
+    return kb
+
+
+def back_to_deadlines_filters(kb: types.inline_keyboard = None):
+    if kb is None:
+        kb = InlineKeyboardMarkup()
+    back_btn = InlineKeyboardButton('Back', callback_data='deadlines days')
     kb.add(back_btn)
 
     return kb
