@@ -24,10 +24,12 @@ async def update_data(message: types.Message):
         barcode, password = await db.get_user_data(message.from_user.id)
         cookies = await auth_microsoft(barcode, password)
 
-    courses_dict = await parser.get_courses(cookies)
-    grades_dict = {}
     token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
     token = decrypt(token, userid)
+
+    courses_dict = await parser.get_courses(token, userid)
+
+    grades_dict = {}
 
     for id_course in courses_dict.keys():
         grades_dict.update({

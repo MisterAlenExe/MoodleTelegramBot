@@ -9,6 +9,7 @@ class Parser:
     security_url = "https://moodle.astanait.edu.kz/user/managetoken.php"
     api_url = "https://moodle.astanait.edu.kz/webservice/rest/server.php"
     assign_url = "https://moodle.astanait.edu.kz/mod/assign/view.php?id="
+    course_url = "https://moodle.astanait.edu.kz/course/view.php?id="
 
     async def get_token_and_userid(self, cookies):
         session = requests.Session()
@@ -18,18 +19,28 @@ class Parser:
         userid = soup.find('div', class_='popover-region collapsed popover-region-notifications').get('data-userid')
         return token, userid
 
-    async def get_courses(self, cookies):
-        session = requests.Session()
-        src = session.get(self.main_url, cookies=cookies)
-        soup = BeautifulSoup(src.text, 'lxml')
-        links = soup.find_all('a')
+    async def get_courses(self, webservice_token, user_id):
+        args = {
+            'moodlewsrestformat': 'json',
+            'wstoken': webservice_token,
+            'wsfunction': 'core_enrol_get_users_courses',
+            'userid': user_id
+        }
+        response = requests.get(self.api_url, params=args)
+        text = json.loads(response.text)
         courses = {}
-        for el in links:
-            if el.get('data-parent-key') == 'mycourses':
-                name_subject = el.select_one('span.media-body').text
-                id_subject = el.get('data-key')
-                link_subject = el.get('href')
-                courses.update({id_subject: {'id': id_subject, 'name': name_subject, 'link': link_subject}})
+
+        for course in text:
+            id_subject = course['id']
+            name_subject = course['fullname']
+            link_subject = f"{self.course_url}{id_subject}"
+            courses.update({
+                id_subject: {
+                    'id': id_subject,
+                    'name': name_subject,
+                    'link': link_subject
+                }
+            })
         return courses
 
     async def get_grades(self, id_subject, webservice_token, user_id):

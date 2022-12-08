@@ -19,11 +19,12 @@ async def auto_update(bot: Bot):
             barcode, password = await db.get_user_data(user_id)
             cookies = await auth_microsoft(barcode, password)
 
-        courses_dict = await parser.get_courses(cookies)
-        grades_dict = json.loads(await db.get_key(user_id, 'grades'))
-        new_grades_dict = {}
         token, userid = await db.get_keys(user_id, 'webservice_token', 'moodle_userid')
         token = decrypt(token, userid)
+
+        courses_dict = await parser.get_courses(token, userid)
+        grades_dict = json.loads(await db.get_key(user_id, 'grades'))
+        new_grades_dict = {}
 
         for id_course in courses_dict.keys():
             new_grades_dict.update({
