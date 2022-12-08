@@ -8,7 +8,7 @@ from functions.login import is_cookies_valid, auth_microsoft
 from functions.parser import Parser
 
 from tgbot.keyboards.moodle import add_delete_button, courses_btns, back_to_grades_courses, deadlines_options, \
-    back_to_deadlines_courses
+    back_to_deadlines_courses, deadlines_day_filters_btns
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
 
@@ -116,6 +116,10 @@ async def deadlines_choose_option(call: types.CallbackQuery):
     await call.answer()
 
 
+async def deadlines_option_day_filters(call: types.CallbackQuery):
+    await call.message.edit_text("Choose filter:", reply_markup=deadlines_day_filters_btns())
+
+
 async def deadlines_option_courses(call: types.CallbackQuery):
     db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
@@ -180,6 +184,11 @@ def register_moodle(dp: Dispatcher):
         deadlines_choose_option,
         lambda c: c.data.split()[0] == 'deadlines',
         lambda c: c.data.split()[1] == 'options'
+    )
+    dp.register_callback_query_handler(
+        deadlines_option_day_filters,
+        lambda c: c.data.split()[0] == 'deadlines',
+        lambda c: c.data.split()[1] == 'days'
     )
     dp.register_callback_query_handler(
         deadlines_option_courses,
