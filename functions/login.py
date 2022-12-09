@@ -4,6 +4,8 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
+from tgbot.utils.logger import logger
+
 
 async def auth_microsoft(barcode, password):
     options = webdriver.ChromeOptions()
@@ -21,23 +23,15 @@ async def auth_microsoft(barcode, password):
     password_field = (By.ID, "i0118")
     next_button = (By.ID, "idSIButton9")
     browser.get('https://moodle.astanait.edu.kz/auth/oidc/')
-    WebDriverWait(browser, 10).until(ec.element_to_be_clickable(email_field)).send_keys(f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f""
-                                                                                        f"{barcode}@astanait.edu.kz")
-    WebDriverWait(browser, 10).until(ec.element_to_be_clickable(next_button)).click()
-    WebDriverWait(browser, 10).until(ec.element_to_be_clickable(password_field)).send_keys(password)
-    WebDriverWait(browser, 10).until(ec.element_to_be_clickable(next_button)).click()
-    WebDriverWait(browser, 10).until(ec.element_to_be_clickable(next_button)).click()
+    wait = WebDriverWait(browser, 10)
+    try:
+        wait.until(ec.element_to_be_clickable(email_field)).send_keys(f"{barcode}@astanait.edu.kz")
+        wait.until(ec.element_to_be_clickable(next_button)).click()
+        wait.until(ec.element_to_be_clickable(password_field)).send_keys(password)
+        wait.until(ec.element_to_be_clickable(next_button)).click()
+        wait.until(ec.element_to_be_clickable(next_button)).click()
+    except:
+        pass
 
     browser_cookies = browser.get_cookies()
     browser.close()
