@@ -21,3 +21,12 @@ def main_menu(kb: types.inline_keyboard = None):
     kb.row(grades_btn, deadlines_btn)
 
     return kb
+
+
+def back_to_menu_btn(kb: types.inline_keyboard = None):
+    if kb is None:
+        kb = InlineKeyboardMarkup()
+    back_btn = InlineKeyboardButton('Back', callback_data='main_menu')
+    kb.add(back_btn)
+
+    return kb

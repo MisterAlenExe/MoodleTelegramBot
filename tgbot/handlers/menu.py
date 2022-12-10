@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 
 from database import Database
 
-from tgbot.keyboards.menu import add_delete_button, main_menu
+from tgbot.keyboards.menu import add_delete_button, main_menu, back_to_menu_btn
 from tgbot.utils.logger import logger, print_msg
 from tgbot.utils.throttling import rate_limit
 
@@ -25,6 +25,14 @@ async def back_to_menu(call: types.CallbackQuery):
     await call.message.edit_text(text, reply_markup=add_delete_button(main_menu()))
 
 
+async def profile(call: types.CallbackQuery):
+    db = Database()
+    userid, barcode = await db.get_keys(call.from_user.id, ('user_id', 'barcode'))
+    text = f"User ID: {userid}\n" \
+           f"Barcode: {barcode}"
+    await call.message.edit_text(text, reply_markup=back_to_menu_btn())
+
+
 async def delete_message(call: types.CallbackQuery):
     try:
         await call.bot.delete_message(call.message.chat.id, call.message.message_id)
@@ -42,4 +50,8 @@ def register_menu(dp: Dispatcher):
     dp.register_callback_query_handler(
         back_to_menu,
         lambda c: c.data == 'main_menu'
+    )
+    dp.register_callback_query_handler(
+        profile,
+        lambda c: c.data == 'profile'
     )
