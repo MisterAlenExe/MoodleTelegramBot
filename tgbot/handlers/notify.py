@@ -61,8 +61,11 @@ async def auto_update(bot: Bot):
 
 
 def register_schedulers(bot, scheduler):
+    # now = datetime.datetime.now()
+    # hours, minutes = divmod(ceil(now.minute / 30) * 30, 60)
+    # rounded_time = (now + datetime.timedelta(hours=hours)).replace(minute=minutes, second=0).strftime(
+    #     "%Y-%m-%d %H:%M:%S")
     now = datetime.datetime.now()
-    hours, minutes = divmod(ceil(now.minute / 30) * 30, 60)
-    rounded_time = (now + datetime.timedelta(hours=hours)).replace(minute=minutes, second=0).strftime(
+    time_start = (now.replace(second=0, microsecond=0) + datetime.timedelta(minutes=10 - now.minute % 10)).strftime(
         "%Y-%m-%d %H:%M:%S")
-    scheduler.add_job(auto_update, 'interval', minutes=30, start_date=rounded_time, kwargs={'bot': bot})
+    scheduler.add_job(auto_update, 'interval', minutes=10, start_date=time_start, kwargs={'bot': bot})
