@@ -43,8 +43,14 @@ async def main():
     register_all_middlewares(dp)
     register_all_handlers(dp, bot, scheduler)
 
-    scheduler.start()
-    await dp.start_polling()
+    try:
+        scheduler.start()
+        await dp.start_polling()
+    finally:
+        db = Database()
+        await db.close()
+        session = bot.get_session()
+        session.close()
 
 
 if __name__ == '__main__':
@@ -52,6 +58,3 @@ if __name__ == '__main__':
         asyncio.run(main())
     except (KeyboardInterrupt, SystemExit):
         logger.error("Bot stopped!")
-    finally:
-        db = Database()
-        asyncio.run(db.close())

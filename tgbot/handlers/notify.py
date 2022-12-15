@@ -14,10 +14,10 @@ async def auto_update(bot: Bot):
     parser = Parser()
 
     for user_id in await db.get_all_users():
-        cookies = json.loads(await db.get_key(user_id, 'cookies'))
-        while not await is_cookies_valid(cookies):
-            barcode, password = await db.get_user_data(user_id)
-            cookies = await auth_microsoft(barcode, password)
+        # cookies = json.loads(await db.get_key(user_id, 'cookies'))
+        # while not await is_cookies_valid(cookies):
+        #     barcode, password = await db.get_user_data(user_id)
+        #     cookies = await auth_microsoft(barcode, password)
 
         token, userid = await db.get_keys(user_id, 'webservice_token', 'moodle_userid')
         token = decrypt(token, userid)
@@ -34,7 +34,7 @@ async def auto_update(bot: Bot):
         text = "Updated grades:\n\n"
         isNewGrade = False
         for id_course in new_grades_dict.keys():
-            diff = new_grades_dict[id_course].items() - grades_dict[id_course].items()
+            diff = new_grades_dict[id_course].items() - grades_dict[str(id_course)].items()
             if len(diff) != 0:
                 isNewGrade = True
                 link_course = courses_dict[id_course]['link']
@@ -42,7 +42,7 @@ async def auto_update(bot: Bot):
                 text += f"  <a href=\"{link_course}\">{name_course}</a>:\n"
                 for el in diff:
                     itemname, grade = el
-                    old_grade = grades_dict[id_course].get(itemname)
+                    old_grade = grades_dict[str(id_course)].get(itemname)
                     text += f"      {itemname} / {old_grade} -> {grade}\n"
                 text += "\n"
         if isNewGrade:
@@ -53,7 +53,6 @@ async def auto_update(bot: Bot):
         await db.set_keys(
             user_id,
             {
-                'cookies': json.dumps(cookies),
                 'courses': json.dumps(courses_dict),
                 'grades': json.dumps(new_grades_dict)
             }
@@ -68,4 +67,4 @@ def register_schedulers(bot, scheduler):
     now = datetime.datetime.now()
     time_start = (now.replace(second=0, microsecond=0) + datetime.timedelta(minutes=10 - now.minute % 10)).strftime(
         "%Y-%m-%d %H:%M:%S")
-    scheduler.add_job(auto_update, 'interval', minutes=10, start_date=time_start, kwargs={'bot': bot})
+    scheduler.add_job(auto_update, 'interval', minutes=10, start_date='2022-12-15 16:03:20', kwargs={'bot': bot})
