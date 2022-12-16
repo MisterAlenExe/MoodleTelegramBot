@@ -34,7 +34,7 @@ class Parser:
                 courses = {}
 
                 for course in text:
-                    id_subject = course['id']
+                    id_subject = str(course['id'])
                     name_subject = course['fullname']
                     link_subject = f"{self.course_url}{id_subject}"
                     courses.update({
@@ -86,7 +86,7 @@ class Parser:
                 deadlines = {}
                 for course in text['courses']:
                     deadlines.update({
-                        course['id']: {}
+                        str(course['id']): {}
                     })
                     for assign in course['assignments']:
                         # duedate = datetime.datetime.fromtimestamp(assign['duedate']).replace(microsecond=0)
@@ -95,8 +95,8 @@ class Parser:
                             id_assign = assign['cmid']
                             name = assign['name']
                             deadline = duedate
-                            deadlines[course['id']].update({
-                                id_assign: {
+                            deadlines[str(course['id'])].update({
+                                str(id_assign): {
                                     'name': name,
                                     'deadline': deadline,
                                     'link': f"{self.assign_url}{id_assign}"

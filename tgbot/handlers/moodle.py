@@ -32,7 +32,7 @@ async def update_data(message: types.Message):
 
     for id_course in courses_dict.keys():
         grades_dict.update({
-            id_course: await parser.get_grades(id_course, token, userid)
+            str(id_course): await parser.get_grades(id_course, token, userid)
         })
 
     deadlines = await parser.get_deadlines(token)
