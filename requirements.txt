@@ -1,6 +1,5 @@
 aiogram==2.23.1
 APScheduler~=3.9.1.post1
-requests~=2.28.1
 selenium~=4.7.2
 beautifulsoup4~=4.11.1
 environs~=9.5.0

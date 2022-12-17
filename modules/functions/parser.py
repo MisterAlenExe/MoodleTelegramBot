@@ -1,6 +1,5 @@
 import datetime
 import aiohttp
-import requests
 import json
 from bs4 import BeautifulSoup
 

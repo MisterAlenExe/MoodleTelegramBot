@@ -1,4 +1,4 @@
-import requests
+import aiohttp
 from selenium import webdriver
 from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
@@ -44,9 +44,9 @@ async def auth_microsoft(barcode, password):
 
 
 async def is_cookies_valid(cookies):
-    session = requests.Session()
-    response = session.get('https://moodle.astanait.edu.kz/?lang=en', cookies=cookies)
-    if "You are not logged in" in response.text:
-        return False
-    else:
-        return True
+    async with aiohttp.ClientSession(cookies=cookies) as session:
+        async with session.get('https://moodle.astanait.edu.kz/?lang=en') as response:
+            if "You are not logged in" in await response.text():
+                return False
+            else:
+                return True
