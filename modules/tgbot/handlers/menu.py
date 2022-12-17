@@ -1,10 +1,10 @@
 from aiogram import Dispatcher, types
 
-from database import Database
+from ...database import Database
 
-from tgbot.keyboards.menu import add_delete_button, main_menu, back_to_menu_btn
-from tgbot.utils.logger import logger, print_msg
-from tgbot.utils.throttling import rate_limit
+from ..keyboards.menu import add_delete_button, main_menu, back_to_menu_btn
+from ..utils.logger import logger, print_msg
+from ..utils.throttling import rate_limit
 
 
 @print_msg

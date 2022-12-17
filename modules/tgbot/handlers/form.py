@@ -2,13 +2,13 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from database import Database
-from tgbot.utils.logger import logger, print_msg
-from tgbot.utils.throttling import rate_limit
-from tgbot.keyboards.moodle import add_delete_button
+from ...database import Database
+from ..utils.logger import print_msg
+from ..utils.throttling import rate_limit
+from ..keyboards.moodle import add_delete_button
 
-from functions.login import auth_microsoft, is_cookies_valid
-from functions.parser import Parser
+from modules.functions.login import auth_microsoft, is_cookies_valid
+from ...functions.parser import Parser
 
 
 class RegForm(StatesGroup):

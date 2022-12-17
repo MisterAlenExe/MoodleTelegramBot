@@ -3,13 +3,13 @@ import datetime
 
 from aiogram import Dispatcher, types
 
-from database import Database
+from ...database import Database
 
-from tgbot.keyboards.moodle import add_delete_button, courses_btns
-from tgbot.keyboards.deadlines import deadlines_options, deadlines_day_filters_btns, back_to_deadlines_filters, \
+from ..keyboards.moodle import add_delete_button, courses_btns
+from ..keyboards.deadlines import deadlines_options, deadlines_day_filters_btns, back_to_deadlines_filters, \
     back_to_deadlines_courses
-from tgbot.utils.logger import logger, print_msg
-from tgbot.utils.throttling import rate_limit
+from ..utils.logger import logger, print_msg
+from ..utils.throttling import rate_limit
 
 
 async def deadlines_choose_option(call: types.CallbackQuery):

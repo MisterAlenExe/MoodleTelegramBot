@@ -3,13 +3,13 @@ import datetime
 
 from aiogram import Dispatcher, types
 
-from database import Database, decrypt
-from functions.login import is_cookies_valid, auth_microsoft
-from functions.parser import Parser
+from ...database import Database, decrypt
+from ...functions.login import is_cookies_valid, auth_microsoft
+from ...functions.parser import Parser
 
-from tgbot.keyboards.moodle import add_delete_button
-from tgbot.utils.logger import logger, print_msg
-from tgbot.utils.throttling import rate_limit
+from ..keyboards.moodle import add_delete_button
+from ..utils.logger import logger, print_msg
+from ..utils.throttling import rate_limit
 
 
 @print_msg

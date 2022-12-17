@@ -1,12 +1,10 @@
 import json
 import datetime
-from math import ceil
 
 from aiogram import Bot
 
-from database import Database, decrypt
-from functions.login import is_cookies_valid, auth_microsoft
-from functions.parser import Parser
+from ...database import Database, decrypt
+from ...functions.parser import Parser
 
 
 async def auto_update(bot: Bot):

@@ -8,7 +8,7 @@ __pycache__/
 
 # Distribution / packaging
 .Python
-moodle/cookies
+modules/moodle/cookies
 build/
 develop-eggs/
 dist/

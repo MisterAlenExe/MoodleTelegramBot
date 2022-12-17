@@ -3,14 +3,10 @@ import datetime
 
 from aiogram import Dispatcher, types
 
-from database import Database, decrypt
-from functions.login import is_cookies_valid, auth_microsoft
-from functions.parser import Parser
+from ...database import Database, decrypt
 
-from tgbot.keyboards.moodle import add_delete_button, courses_btns
-from tgbot.keyboards.grades import back_to_grades_courses
-from tgbot.utils.logger import logger, print_msg
-from tgbot.utils.throttling import rate_limit
+from ..keyboards.moodle import courses_btns
+from ..keyboards.grades import back_to_grades_courses
 
 
 async def grades(call: types.CallbackQuery):

@@ -4,7 +4,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support import expected_conditions as ec
 from selenium.webdriver.support.ui import WebDriverWait
 
-from tgbot.utils.logger import logger
+from ..tgbot.utils.logger import logger
 
 
 async def auth_microsoft(barcode, password):
