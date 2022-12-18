@@ -5,7 +5,7 @@ from aioredis.client import Redis
 
 class Database:
     def __init__(self):
-        self.redis = aioredis.from_url(f"redis://localhost", decode_responses=True)
+        self.redis = aioredis.from_url("redis://redis", decode_responses=True)
 
     async def close(self):
         await self.redis.close()

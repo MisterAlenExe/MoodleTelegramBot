@@ -17,7 +17,9 @@ async def auth_microsoft(barcode, password):
     options.add_argument("--disable-extensions")
     options.add_argument("--disable-blink-features=AutomationControlled")
     options.add_argument('log-level=3')
-    browser = webdriver.Chrome(options=options)
+    options.add_argument('--no-sandbox')
+    options.add_argument('--disable-dev-shm-usage')
+    browser = webdriver.Chrome(chrome_options=options)
 
     email_field = (By.ID, "i0116")
     password_field = (By.ID, "i0118")

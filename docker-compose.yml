@@ -1,0 +1,24 @@
+version: '3.7'
+
+services:
+  redis:
+    image: redis:latest
+    ports:
+      - "6379:6379"
+    command: redis-server
+    networks:
+      - app-tier
+    restart: on-failure
+  bot:
+    build: .
+    environment:
+      BOT_TOKEN: "${BOT_TOKEN}"
+    restart: always
+    depends_on:
+      - redis
+    networks:
+      - app-tier
+
+networks:
+  app-tier:
+    driver: bridge
