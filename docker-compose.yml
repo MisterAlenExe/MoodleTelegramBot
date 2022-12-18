@@ -5,7 +5,10 @@ services:
     image: redis:latest
     ports:
       - "6379:6379"
-    command: redis-server
+    command:
+      - 'redis-server'
+    volumes:
+      - ./data:/var/lib/redis
     networks:
       - app-tier
     restart: on-failure
