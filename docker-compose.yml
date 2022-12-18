@@ -8,7 +8,7 @@ services:
     command:
       - 'redis-server'
     volumes:
-      - ./data:/var/lib/redis
+      - /var/lib/redis:/data
     networks:
       - app-tier
     restart: on-failure
