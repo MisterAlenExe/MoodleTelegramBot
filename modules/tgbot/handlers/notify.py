@@ -5,6 +5,7 @@ from aiogram import Bot
 
 from ...database import Database, decrypt
 from ...functions.parser import Parser
+from ..utils.logger import logger
 
 
 async def auto_update(bot: Bot):
@@ -81,12 +82,14 @@ async def auto_update(bot: Bot):
 
         if isNewGrade:
             await bot.send_message(chat_id=user_id, text=text_grades, parse_mode='HTML')
+            logger.info(f"{user_id} - grades - some changes")
         else:
-            await bot.send_message(chat_id=user_id, text="Bot didn't find any changes")
+            logger.info(f"{user_id} - grades - no changes")
         if isNewDeadline:
             await bot.send_message(chat_id=user_id, text=text_deadlines, parse_mode='HTML')
+            logger.info(f"{user_id} - deadlines - some changes")
         else:
-            await bot.send_message(chat_id=user_id, text="Bot didn't find any changes")
+            logger.info(f"{user_id} - deadlines - no changes")
 
         await db.set_keys(user_id, {
             'courses': json.dumps(courses_dict),
