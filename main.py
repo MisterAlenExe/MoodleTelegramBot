@@ -7,6 +7,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from modules.database import Database
 from modules.tgbot.utils.config import load_config
+from modules.tgbot.utils.logger import logger
 
 from modules.tgbot.handlers.menu import register_menu
 from modules.tgbot.handlers.moodle import register_moodle
@@ -14,7 +15,6 @@ from modules.tgbot.handlers.grades import register_grades
 from modules.tgbot.handlers.deadlines import register_deadlines
 from modules.tgbot.handlers.form import register_form
 from modules.tgbot.handlers.notify import register_schedulers
-from modules.tgbot.utils.logger import logger
 from modules.tgbot.middlewares.throttling import ThrottlingMiddleware
 
 
