@@ -5,7 +5,7 @@ from aiogram.dispatcher import Dispatcher
 from aiogram.contrib.fsm_storage.memory import MemoryStorage
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
-from modules.database import Database
+from modules import database
 from modules.tgbot.utils.config import load_config
 from modules.tgbot.utils.logger import logger
 
@@ -36,7 +36,7 @@ async def main():
 
     logger.info("Starting bot")
 
-    bot = Bot(token=data_config['bot_token'])
+    bot = Bot(token=data_config['BOT_TOKEN'])
     dp = Dispatcher(bot, storage=MemoryStorage())
     scheduler = AsyncIOScheduler(timezone="Asia/Almaty")
 
@@ -45,10 +45,10 @@ async def main():
 
     try:
         scheduler.start()
+        await database.start_redis(data_config['REDIS_PASSWD'])
         await dp.start_polling()
     finally:
-        db = Database()
-        await db.close()
+        await database.close_redis()
         session = bot.get_session()
         session.close()
 

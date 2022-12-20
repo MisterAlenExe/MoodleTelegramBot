@@ -3,19 +3,21 @@ version: '3.7'
 services:
   redis:
     image: redis:latest
+    container_name: redis
     ports:
       - "6379:6379"
-    command:
-      - 'redis-server'
+    command: "redis-server --appendonly yes --replica-read-only no --save 20 1 --loglevel warning --requirepass ${REDIS_PASSWORD}"
     volumes:
       - /var/lib/redis:/data
+    restart: always
     networks:
       - app-tier
-    restart: on-failure
   bot:
     build: .
+    container_name: bot
     environment:
       BOT_TOKEN: "${BOT_TOKEN}"
+      REDIS_PASSWORD: "${REDIS_PASSWORD}"
     restart: always
     depends_on:
       - redis

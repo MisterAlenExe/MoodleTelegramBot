@@ -3,58 +3,73 @@ import aioredis
 from aioredis.client import Redis
 
 
-class Database:
-    def __init__(self):
-        self.redis = aioredis.from_url("redis://redis", decode_responses=True)
+redis: Redis = None
+redis1: Redis = None
 
-    async def close(self):
-        await self.redis.close()
 
-    async def get_all_users(self):
-        return await self.redis.keys()
+async def start_redis(passwd: str):
+    global redis
+    redis = await aioredis.from_url(f"redis://redis", decode_responses=True, password=passwd)
 
-    async def set_key(self, name: str, key: str, value):
-        await self.redis.hset(name, key, value)
 
-    async def get_key(self, name: str, key: str):
-        return await self.redis.hget(name, key)
+async def close_redis():
+    await redis.close()
 
-    async def set_keys(self, name: str, dict: dict):
-        await self.redis.hmset(name, dict)
 
-    async def get_keys(self, name: str, *keys) -> tuple:
-        return await self.redis.hmget(name, *keys)
+async def get_all_users():
+    return await redis.keys()
 
-    async def get_dict(self, name: str) -> dict:
-        return await self.redis.hgetall(name)
 
-    async def if_user_exists(self, user_id: str):
-        if await self.redis.exists(user_id):
-            return True
-        else:
-            return False
+async def set_key(name: str, key: str, value):
+    await redis.hset(name, key, value)
 
-    async def add_new_user(self, user_id: str):
-        new_user = {
-            'user_id': user_id,
-        }
-        await self.set_keys(user_id, new_user)
 
-    async def register_moodle_user(self, user_id: str, barcode: str, password: str, cookies: dict, moodle_userid: str,
-                                   token: str):
-        user = {
-            'barcode': barcode,
-            'password': crypt(password, barcode),
-            'cookies': json.dumps(cookies),
-            'moodle_userid': moodle_userid,
-            'webservice_token': crypt(token, moodle_userid)
-        }
-        await self.set_keys(user_id, user)
+async def get_key(name: str, key: str):
+    return await redis.hget(name, key)
 
-    async def get_user_data(self, user_id: str):
-        barcode = await self.get_key(user_id, 'barcode')
-        password = decrypt(await self.get_key(user_id, 'password'), barcode)
-        return barcode, password
+
+async def set_keys(name: str, dict: dict):
+    await redis.hmset(name, dict)
+
+
+async def get_keys(name: str, *keys) -> tuple:
+    return await redis.hmget(name, *keys)
+
+
+async def get_dict(name: str) -> dict:
+    return await redis.hgetall(name)
+
+
+async def if_user_exists(user_id: str):
+    if await redis.exists(user_id):
+        return True
+    else:
+        return False
+
+
+async def add_new_user(user_id: str):
+    new_user = {
+        'user_id': user_id,
+    }
+    await set_keys(user_id, new_user)
+
+
+async def register_moodle_user(user_id: str, barcode: str, password: str, cookies: dict, moodle_userid: str,
+                               token: str):
+    user = {
+        'barcode': barcode,
+        'password': crypt(password, barcode),
+        'cookies': json.dumps(cookies),
+        'moodle_userid': moodle_userid,
+        'webservice_token': crypt(token, moodle_userid)
+    }
+    await set_keys(user_id, user)
+
+
+async def get_user_data(user_id: str):
+    barcode = await get_key(user_id, 'barcode')
+    password = decrypt(await get_key(user_id, 'password'), barcode)
+    return barcode, password
 
 
 def crypto(message: str, secret: str) -> str:

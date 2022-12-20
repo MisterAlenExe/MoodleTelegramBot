@@ -3,7 +3,7 @@ import datetime
 
 from aiogram import Dispatcher, types
 
-from ...database import Database
+from ... import database as db
 
 from ..keyboards.moodle import add_delete_button, courses_btns
 from ..keyboards.deadlines import deadlines_options, deadlines_day_filters_btns, back_to_deadlines_filters, \
@@ -22,13 +22,11 @@ async def deadlines_option_day_filters(call: types.CallbackQuery):
 
 
 async def deadlines_option_courses(call: types.CallbackQuery):
-    db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     await call.message.edit_text("Choose course:", reply_markup=courses_btns('deadlines', courses_dict))
 
 
 async def show_deadlines_for_day(call: types.CallbackQuery):
-    db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     deadlines_dict = json.loads(await db.get_key(call.from_user.id, 'deadlines'))
 
@@ -100,7 +98,6 @@ async def show_deadlines_for_day(call: types.CallbackQuery):
 
 
 async def show_deadlines_for_course(call: types.CallbackQuery):
-    db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     deadlines_dict = json.loads(await db.get_key(call.from_user.id, 'deadlines'))
 

@@ -2,7 +2,7 @@ from aiogram import Dispatcher, types
 from aiogram.dispatcher import FSMContext
 from aiogram.dispatcher.filters.state import State, StatesGroup
 
-from ...database import Database
+from ... import database as db
 from ..utils.logger import print_msg
 from ..utils.throttling import rate_limit
 from ..keyboards.moodle import add_delete_button
@@ -19,7 +19,6 @@ class RegForm(StatesGroup):
 @print_msg
 @rate_limit(limit=3)
 async def register_moodle(message: types.Message, state: FSMContext):
-    db = Database()
     if not await db.if_user_exists(message.from_user.id):
         await db.add_new_user(message.from_user.id)
 
@@ -63,7 +62,6 @@ async def wait_password(message: types.Message, state: FSMContext):
             data['msg_del'] = msg
         cookies = await auth_microsoft(barcode, password)
         if await is_cookies_valid(cookies):
-            db = Database()
             parser = Parser()
             token, userid = await parser.get_token_and_userid(cookies)
             await db.register_moodle_user(message.from_user.id, barcode, password, cookies, userid, token)

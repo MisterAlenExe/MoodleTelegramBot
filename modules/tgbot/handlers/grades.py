@@ -3,20 +3,18 @@ import datetime
 
 from aiogram import Dispatcher, types
 
-from ...database import Database, decrypt
+from ... import database as db
 
 from ..keyboards.moodle import courses_btns
 from ..keyboards.grades import back_to_grades_courses
 
 
 async def grades(call: types.CallbackQuery):
-    db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     await call.message.edit_text("Choose course:", reply_markup=courses_btns('grades', courses_dict))
 
 
 async def show_grades_for_course(call: types.CallbackQuery):
-    db = Database()
     courses_dict = json.loads(await db.get_key(call.from_user.id, 'courses'))
     grades_dict = json.loads(await db.get_key(call.from_user.id, 'grades'))
 

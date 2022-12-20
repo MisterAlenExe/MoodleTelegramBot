@@ -3,7 +3,7 @@ import datetime
 
 from aiogram import Dispatcher, types
 
-from ...database import Database, decrypt
+from ... import database as db
 from ...functions.login import is_cookies_valid, auth_microsoft
 from ...functions.parser import Parser
 
@@ -15,7 +15,6 @@ from ..utils.throttling import rate_limit
 @print_msg
 @rate_limit(limit=3)
 async def update_data(message: types.Message):
-    db = Database()
     parser = Parser()
 
     cookies = json.loads(await db.get_key(message.from_user.id, 'cookies'))
@@ -24,7 +23,7 @@ async def update_data(message: types.Message):
         cookies = await auth_microsoft(barcode, password)
 
     token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
-    token = decrypt(token, userid)
+    token = db.decrypt(token, userid)
 
     courses_dict = await parser.get_courses(token, userid)
 
@@ -53,7 +52,6 @@ async def update_data(message: types.Message):
 @rate_limit(limit=3)
 async def send_active_courses(message: types.Message):
     text = ""
-    db = Database()
     courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
     for course in courses_dict.values():
         text += f"ID - {course['id']}\n" \
@@ -65,7 +63,6 @@ async def send_active_courses(message: types.Message):
 @print_msg
 @rate_limit(limit=3)
 async def send_deadlines(message: types.Message):
-    db = Database()
     courses_dict = json.loads(await db.get_key(message.from_user.id, 'courses'))
     deadlines_dict = json.loads(await db.get_key(message.from_user.id, 'deadlines'))
 

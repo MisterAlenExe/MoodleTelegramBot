@@ -1,6 +1,6 @@
 from aiogram import Dispatcher, types
 
-from ...database import Database
+from ... import database as db
 
 from ..keyboards.menu import add_delete_button, main_menu, back_to_menu_btn
 from ..utils.logger import logger, print_msg
@@ -10,7 +10,6 @@ from ..utils.throttling import rate_limit
 @print_msg
 @rate_limit(limit=3)
 async def menu(message: types.Message):
-    db = Database()
     if not await db.if_user_exists(message.from_user.id):
         await db.add_new_user(message.from_user.id)
     text = "Choose one and click:"
@@ -18,7 +17,6 @@ async def menu(message: types.Message):
 
 
 async def back_to_menu(call: types.CallbackQuery):
-    db = Database()
     if not await db.if_user_exists(call.from_user.id):
         await db.add_new_user(call.from_user.id)
     text = "Choose one and click:"
@@ -26,7 +24,6 @@ async def back_to_menu(call: types.CallbackQuery):
 
 
 async def profile(call: types.CallbackQuery):
-    db = Database()
     userid, barcode = await db.get_keys(call.from_user.id, ('user_id', 'barcode'))
     text = f"User ID: {userid}\n" \
            f"Barcode: {barcode}"

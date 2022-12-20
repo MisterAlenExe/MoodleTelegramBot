@@ -5,6 +5,7 @@ def load_config():
     env = Env()
     env.read_env(".env")
     data = {
-        'bot_token': env.str("BOT_TOKEN")
+        'BOT_TOKEN': env.str("BOT_TOKEN"),
+        'REDIS_PASSWD': env.str("REDIS_PASSWORD")
     }
     return data

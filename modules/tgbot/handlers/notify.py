@@ -3,13 +3,12 @@ import datetime
 
 from aiogram import Bot
 
-from ...database import Database, decrypt
+from ... import database as db
 from ...functions.parser import Parser
 from ..utils.logger import logger
 
 
 async def auto_update(bot: Bot):
-    db = Database()
     parser = Parser()
 
     for user_id in await db.get_all_users():
@@ -19,7 +18,7 @@ async def auto_update(bot: Bot):
         #     cookies = await auth_microsoft(barcode, password)
 
         token, userid = await db.get_keys(user_id, 'webservice_token', 'moodle_userid')
-        token = decrypt(token, userid)
+        token = db.decrypt(token, userid)
 
         courses_dict = await parser.get_courses(token, userid)
         grades_dict = json.loads(await db.get_key(user_id, 'grades'))
