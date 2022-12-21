@@ -12,11 +12,6 @@ async def auto_update(bot: Bot):
     parser = Parser()
 
     for user_id in await db.get_all_users():
-        # cookies = json.loads(await db.get_key(user_id, 'cookies'))
-        # while not await is_cookies_valid(cookies):
-        #     barcode, password = await db.get_user_data(user_id)
-        #     cookies = await auth_microsoft(barcode, password)
-
         token, userid = await db.get_keys(user_id, 'webservice_token', 'moodle_userid')
         token = db.decrypt(token, userid)
 

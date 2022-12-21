@@ -1,15 +1,12 @@
-import json
 import datetime
+import json
 
 from aiogram import Dispatcher, types
 
-from ... import database as db
-
-from ..keyboards.moodle import add_delete_button, courses_btns
 from ..keyboards.deadlines import deadlines_options, deadlines_day_filters_btns, back_to_deadlines_filters, \
     back_to_deadlines_courses
-from ..utils.logger import logger, print_msg
-from ..utils.throttling import rate_limit
+from ..keyboards.moodle import courses_btns
+from ... import database as db
 
 
 async def deadlines_choose_option(call: types.CallbackQuery):
