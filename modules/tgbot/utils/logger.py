@@ -13,6 +13,8 @@ logging.basicConfig(
     format="%(asctime)s - %(levelname)s - %(message)s",
     datefmt='%d/%m %H:%M:%S'
     )
+
+logging.getLogger("apscheduler").setLevel('WARNING')
 logger = logging.getLogger()
 
 
