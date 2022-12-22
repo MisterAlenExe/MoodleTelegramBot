@@ -17,15 +17,13 @@ from ..utils.throttling import rate_limit
 async def update_data(message: types.Message):
     parser = Parser()
 
-    cookies = json.loads(await db.get_key(message.from_user.id, 'cookies'))
-    while not await is_cookies_valid(cookies):
-        barcode, password = await db.get_user_data(message.from_user.id)
-        cookies = await auth_microsoft(barcode, password)
-
     token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
     token = db.decrypt(token, userid)
 
     courses_dict = await parser.get_courses(token, userid)
+
+    if courses_dict is None:
+        return
 
     grades_dict = {}
 
@@ -39,7 +37,6 @@ async def update_data(message: types.Message):
     await db.set_keys(
         message.from_user.id,
         {
-            'cookies': json.dumps(cookies),
             'courses': json.dumps(courses_dict),
             'grades': json.dumps(grades_dict),
             'deadlines': json.dumps(deadlines)

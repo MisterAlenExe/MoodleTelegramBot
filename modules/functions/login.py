@@ -46,9 +46,13 @@ async def auth_microsoft(barcode, password):
 
 
 async def is_cookies_valid(cookies):
-    async with aiohttp.ClientSession(cookies=cookies) as session:
-        async with session.get('https://moodle.astanait.edu.kz/?lang=en') as response:
-            if "You are not logged in" in await response.text():
-                return False
-            else:
-                return True
+    try:
+        async with aiohttp.ClientSession(cookies=cookies) as session:
+            async with session.get('https://moodle.astanait.edu.kz/?lang=en') as response:
+                if "You are not logged in" in await response.text():
+                    return False
+                else:
+                    return True
+    except aiohttp.ClientConnectorError:
+        logger.error("Connection can not be established.")
+        return False
