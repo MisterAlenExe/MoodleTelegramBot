@@ -94,7 +94,7 @@ async def auto_update(bot: Bot):
                 'grades': json.dumps(new_grades_dict),
                 'deadlines': json.dumps(new_deadlines_dict)
             })
-    except AttributeError:
+    except Exception:
         pass
 
 
