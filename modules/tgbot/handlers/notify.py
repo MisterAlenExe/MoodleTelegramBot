@@ -27,8 +27,10 @@ async def auto_update(bot: Bot):
         new_grades_dict = {}
         for id_course in courses_dict.keys():
             new_grades_dict.update({id_course: await parser.get_grades(id_course, token, userid)})
+            if new_grades_dict[id_course] is None:
+                return
         new_deadlines_dict = await parser.get_deadlines(token)
-        if new_grades_dict is None or new_deadlines_dict is None:
+        if new_deadlines_dict is None:
             return
 
         text_grades = "Updated grades:\n\n"
