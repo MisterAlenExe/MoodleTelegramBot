@@ -1,4 +1,4 @@
-aiogram~=2.23.1
+aiogram~=2.24
 APScheduler~=3.9.1.post1
 selenium~=4.7.2
 beautifulsoup4~=4.11.1
