@@ -19,8 +19,8 @@ class Parser:
                 async with session.get(self.security_url) as response:
                     soup = BeautifulSoup(await response.text(), 'lxml')
                     token = soup.find('tbody').find('tr').find('td').text
-                    userid = soup.find('div', class_='popover-region collapsed popover-region-notifications').get('data'
-                                                                                                                  '-userid')
+                    userid = soup.find('div', class_='popover-region collapsed popover-region-notifications') \
+                        .get('data-userid')
                     return token, userid
         except aiohttp.ClientConnectorError:
             logger.error("Connection can not be established.")
@@ -104,7 +104,6 @@ class Parser:
                             str(course['id']): {}
                         })
                         for assign in course['assignments']:
-                            # duedate = datetime.datetime.fromtimestamp(assign['duedate']).replace(microsecond=0)
                             duedate = assign['duedate']
                             if duedate > time_now:
                                 id_assign = assign['cmid']

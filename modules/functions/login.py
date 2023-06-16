@@ -32,7 +32,7 @@ async def auth_microsoft(barcode, password):
         wait.until(ec.element_to_be_clickable(password_field)).send_keys(password)
         wait.until(ec.element_to_be_clickable(next_button)).click()
         wait.until(ec.element_to_be_clickable(next_button)).click()
-    except:
+    except Exception as e:
         pass
 
     browser_cookies = browser.get_cookies()
