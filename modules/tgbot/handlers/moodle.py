@@ -4,7 +4,6 @@ import datetime
 from aiogram import Dispatcher, types
 
 from ... import database as db
-from ...functions.login import is_cookies_valid, auth_microsoft
 from ...functions.parser import Parser
 
 from ..keyboards.moodle import add_delete_button
@@ -17,10 +16,9 @@ from ..utils.throttling import rate_limit
 async def update_data(message: types.Message):
     parser = Parser()
 
-    token, userid = await db.get_keys(message.from_user.id, 'webservice_token', 'moodle_userid')
-    token = db.decrypt(token, userid)
+    moodle_userid, token = await db.get_user_data(message.from_user.id)
 
-    courses_dict = await parser.get_courses(token, userid)
+    courses_dict = await parser.get_courses(token, moodle_userid)
 
     if courses_dict is None:
         return
@@ -29,10 +27,10 @@ async def update_data(message: types.Message):
 
     for id_course in courses_dict.keys():
         grades_dict.update({
-            str(id_course): await parser.get_grades(id_course, token, userid)
+            str(id_course): await parser.get_grades(id_course, token, moodle_userid)
         })
 
-    deadlines = await parser.get_deadlines(token)
+    deadlines = await parser.get_deadlines(token, courses_dict)
 
     await db.set_keys(
         message.from_user.id,

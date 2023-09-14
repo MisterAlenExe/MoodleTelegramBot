@@ -15,10 +15,9 @@ async def auto_update(bot: Bot):
     parser = Parser()
 
     for user_id in await db.get_all_users():
-        token, userid = await db.get_keys(user_id, 'webservice_token', 'moodle_userid')
-        token = db.decrypt(token, userid)
-
-        courses_dict = await parser.get_courses(token, userid)
+        moodle_userid, token = await db.get_user_data(user_id)
+        
+        courses_dict = await parser.get_courses(token, moodle_userid)
         if courses_dict is None:
             return
         grades_dict = json.loads(await db.get_key(user_id, 'grades'))
@@ -26,10 +25,10 @@ async def auto_update(bot: Bot):
 
         new_grades_dict = {}
         for id_course in courses_dict.keys():
-            new_grades_dict.update({id_course: await parser.get_grades(id_course, token, userid)})
+            new_grades_dict.update({id_course: await parser.get_grades(id_course, token, moodle_userid)})
             if new_grades_dict[id_course] is None:
                 return
-        new_deadlines_dict = await parser.get_deadlines(token)
+        new_deadlines_dict = await parser.get_deadlines(token, courses_dict)
         if new_deadlines_dict is None:
             return
 
@@ -102,11 +101,7 @@ async def auto_update(bot: Bot):
 
 
 def register_schedulers(bot, scheduler):
-    # now = datetime.datetime.now()
-    # hours, minutes = divmod(ceil(now.minute / 30) * 30, 60)
-    # rounded_time = (now + datetime.timedelta(hours=hours)).replace(minute=minutes, second=0).strftime(
-    #     "%Y-%m-%d %H:%M:%S")
     now = datetime.datetime.now()
     time_start = (now.replace(second=0, microsecond=0) + datetime.timedelta(minutes=10 - now.minute % 10)).strftime(
         "%Y-%m-%d %H:%M:%S")
-    scheduler.add_job(auto_update, 'interval', minutes=10, start_date=time_start, kwargs={'bot': bot})
+    scheduler.add_job(auto_update, 'interval', seconds=10, kwargs={'bot': bot})

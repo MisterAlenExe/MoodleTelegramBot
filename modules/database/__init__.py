@@ -9,7 +9,7 @@ redis1: Redis = None
 
 async def start_redis(passwd: str):
     global redis
-    redis = await aioredis.from_url(f"redis://redis", decode_responses=True, password=passwd)
+    redis = await aioredis.from_url(f"redis://localhost", decode_responses=True)
 
 
 async def close_redis():
@@ -49,27 +49,29 @@ async def if_user_exists(user_id: str):
 
 async def add_new_user(user_id: str):
     new_user = {
-        'user_id': user_id,
+        "user_id": user_id,
     }
     await set_keys(user_id, new_user)
 
 
-async def register_moodle_user(user_id: str, barcode: str, password: str, cookies: dict, moodle_userid: str,
-                               token: str):
+async def register_moodle_user(
+    user_id: str,
+    barcode: str,
+    moodle_userid: str,
+    token: str,
+):
     user = {
-        'barcode': barcode,
-        'password': crypt(password, barcode),
-        'cookies': json.dumps(cookies),
-        'moodle_userid': moodle_userid,
-        'webservice_token': crypt(token, moodle_userid)
+        "barcode": barcode,
+        "moodle_userid": moodle_userid,
+        "token": crypt(token, barcode),
     }
     await set_keys(user_id, user)
 
 
 async def get_user_data(user_id: str):
-    barcode = await get_key(user_id, 'barcode')
-    password = decrypt(await get_key(user_id, 'password'), barcode)
-    return barcode, password
+    moodle_userid = await get_key(user_id, "moodle_userid")
+    token = decrypt(await get_key(user_id, "token"), "221900")
+    return moodle_userid, token
 
 
 def crypto(message: str, secret: str) -> str:
@@ -81,13 +83,13 @@ def crypto(message: str, secret: str) -> str:
         i += 1
         if i >= len(secret):
             i = 0
-    return ''.join(chr(c) for c in new_chars)
+    return "".join(chr(c) for c in new_chars)
 
 
 def crypt(message: str, secret: str) -> str:
-    return crypto(message, secret).encode('utf-8').hex()
+    return crypto(message, secret).encode("utf-8").hex()
 
 
 def decrypt(message_hex: str, secret: str) -> str:
-    message = bytes.fromhex(message_hex).decode('utf-8')
+    message = bytes.fromhex(message_hex).decode("utf-8")
     return crypto(message, secret)
