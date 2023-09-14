@@ -104,4 +104,4 @@ def register_schedulers(bot, scheduler):
     now = datetime.datetime.now()
     time_start = (now.replace(second=0, microsecond=0) + datetime.timedelta(minutes=10 - now.minute % 10)).strftime(
         "%Y-%m-%d %H:%M:%S")
-    scheduler.add_job(auto_update, 'interval', seconds=10, kwargs={'bot': bot})
+    scheduler.add_job(auto_update, 'interval', minutes=10, start_date=time_start, kwargs={'bot': bot})
