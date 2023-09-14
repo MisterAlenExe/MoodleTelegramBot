@@ -4,4 +4,4 @@ beautifulsoup4~=4.11.1
 environs~=9.5.0
 aioredis~=2.0.1
 aiohttp~=3.8.3
-lxml~=4.9.2
+lxml~=4.9.3
