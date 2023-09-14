@@ -9,7 +9,7 @@ redis1: Redis = None
 
 async def start_redis(passwd: str):
     global redis
-    redis = await aioredis.from_url(f"redis://localhost", decode_responses=True)
+    redis = await aioredis.from_url(f"redis://redis", password=passwd, decode_responses=True)
 
 
 async def close_redis():
